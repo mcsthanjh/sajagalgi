@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="ko"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMDE1MTE5ODM5MzYwMjc0NDgyNCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzBkYzVhMWNhMWQ5YjhjNzdfaW5kZXguaHRtbC03NDkifSwiZXhwIjoxNzg5ODg1MzI0LCJpYXQiOjE3ODk4ODE3MjQsImFsZyI6IlJTMjU2In0.BgrgvQIxN0j1c7YGcvto0yJVt-n7zO_CenUAPVlfNW8uZCMEwaqlt-Yubw-gzRUbsBg9uwfd0D3LVKhMDM5cG3n0pvC6h4AMnQ4hAo5sudWijq6lhEoULrjy2Vv3rvp5R4pKeDvCHxCvEGZFcA74pe7ozUouDL2qLcwSJyAKkhpK3ppz9dZhBMBvTB89Igh0nxxJIy8FpZvxyu3g8akl2ITbIqUhUnjxs81E_nQEZP1fi86hEr3UGbSLLq4qqRlcoZ_5vWIcyOQ0G1kLK3ofwM48K7RibahZYvYIlGU8yQw4zG_6MOyCt2Vp0QM29Nl-RW2xbAo8aStC7lGdqZ2ubg","c_0dc5a1ca1d9b8c77_index.html-749")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>행정정보 통합관리 기본법 검색 서비스</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans KR"', 'sans-serif'],
+          },
+          colors: {
+            gov: {
+              50: '#f0f5fa',
+              100: '#e1ecf6',
+              200: '#c5dcee',
+              300: '#9ac3e1',
+              400: '#67a3d1',
+              500: '#4384bf',
+              600: '#2f69a5',
+              700: '#255486',
+              800: '#1e4875',
+              900: '#173656',
+              card: '#1e4875',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    mark.highlight {
+      background-color: #fef08a;
+      color: #854d0e;
+      padding: 1px 3px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .card-news-bg {
+      background-color: #1e4b7a;
+      background-image: radial-gradient(circle at top right, #2b649e 0%, #173b61 100%);
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:"Noto Sans KR", sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.inset-y-0{top:0px;bottom:0px}.bottom-5{bottom:1.25rem}.left-0{left:0px}.right-0{right:0px}.right-4{right:1rem}.right-5{right:1.25rem}.top-0{top:0px}.top-24{top:6rem}.top-4{top:1rem}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-auto{margin-top:auto;margin-bottom:auto}.mb-1{margin-bottom:0.25rem}.mb-2\.5{margin-bottom:0.625rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mr-1{margin-right:0.25rem}.mr-1\.5{margin-right:0.375rem}.mr-2{margin-right:0.5rem}.mt-1{margin-top:0.25rem}.mt-4{margin-top:1rem}.mb-2{margin-bottom:0.5rem}.line-clamp-3{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.aspect-square{aspect-ratio:1 / 1}.h-12{height:3rem}.h-16{height:4rem}.h-2{height:0.5rem}.h-2\.5{height:0.625rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-3\.5{height:0.875rem}.h-7{height:1.75rem}.max-h-\[85vh\]{max-height:85vh}.min-h-screen{min-height:100vh}.w-12{width:3rem}.w-2{width:0.5rem}.w-2\.5{width:0.625rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-full{width:100%}.w-3\.5{width:0.875rem}.w-7{width:1.75rem}.max-w-3xl{max-width:48rem}.max-w-7xl{max-width:80rem}.max-w-md{max-width:28rem}.flex-grow{flex-grow:1}.translate-y-10{--tw-translate-y:2.5rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-3\.5{gap:0.875rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-x-2 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.5rem * var(--tw-space-x-reverse));margin-left:calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.625rem * var(--tw-space-x-reverse));margin-left:calc(0.625rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-3 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.75rem * var(--tw-space-x-reverse));margin-left:calc(0.75rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-7 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.75rem * var(--tw-space-y-reverse))}.space-x-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.375rem * var(--tw-space-x-reverse));margin-left:calc(0.375rem * calc(1 - var(--tw-space-x-reverse)))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-b-2xl{border-bottom-right-radius:1rem;border-bottom-left-radius:1rem}.rounded-t-2xl{border-top-left-radius:1rem;border-top-right-radius:1rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-blue-900{--tw-border-opacity:1;border-color:rgb(30 58 138 / var(--tw-border-opacity, 1))}.border-blue-900\/40{border-color:rgb(30 58 138 / 0.4)}.border-gov-200{--tw-border-opacity:1;border-color:rgb(197 220 238 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-200\/80{border-color:rgb(226 232 240 / 0.8)}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-white\/20{border-color:rgb(255 255 255 / 0.2)}.border-slate-200\/90{border-color:rgb(226 232 240 / 0.9)}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.bg-black\/20{background-color:rgb(0 0 0 / 0.2)}.bg-black\/60{background-color:rgb(0 0 0 / 0.6)}.bg-black\/80{background-color:rgb(0 0 0 / 0.8)}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-gov-50{--tw-bg-opacity:1;background-color:rgb(240 245 250 / var(--tw-bg-opacity, 1))}.bg-gov-600{--tw-bg-opacity:1;background-color:rgb(47 105 165 / var(--tw-bg-opacity, 1))}.bg-gov-700{--tw-bg-opacity:1;background-color:rgb(37 84 134 / var(--tw-bg-opacity, 1))}.bg-indigo-500{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247 / var(--tw-bg-opacity, 1))}.bg-rose-500{--tw-bg-opacity:1;background-color:rgb(244 63 94 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-100\/70{background-color:rgb(241 245 249 / 0.7)}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-400{--tw-bg-opacity:1;background-color:rgb(148 163 184 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/20{background-color:rgb(255 255 255 / 0.2)}.p-1{padding:0.25rem}.p-1\.5{padding:0.375rem}.p-12{padding:3rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-7{padding:1.75rem}.p-2{padding:0.5rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-7{padding-top:1.75rem;padding-bottom:1.75rem}.pb-3{padding-bottom:0.75rem}.pl-11{padding-left:2.75rem}.pl-3\.5{padding-left:0.875rem}.pr-10{padding-right:2.5rem}.pr-3\.5{padding-right:0.875rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-3{padding-top:0.75rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-sans{font-family:"Noto Sans KR", sans-serif}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.leading-snug{line-height:1.375}.tracking-tight{letter-spacing:-0.025em}.tracking-widest{letter-spacing:0.1em}.text-blue-100{--tw-text-opacity:1;color:rgb(219 234 254 / var(--tw-text-opacity, 1))}.text-blue-100\/90{color:rgb(219 234 254 / 0.9)}.text-blue-200{--tw-text-opacity:1;color:rgb(191 219 254 / var(--tw-text-opacity, 1))}.text-blue-300\/80{color:rgb(147 197 253 / 0.8)}.text-gov-600{--tw-text-opacity:1;color:rgb(47 105 165 / var(--tw-text-opacity, 1))}.text-gov-700{--tw-text-opacity:1;color:rgb(37 84 134 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-white\/70{color:rgb(255 255 255 / 0.7)}.text-amber-500{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-emerald-500{--tw-text-opacity:1;color:rgb(16 185 129 / var(--tw-text-opacity, 1))}.text-indigo-500{--tw-text-opacity:1;color:rgb(99 102 241 / var(--tw-text-opacity, 1))}.text-rose-500{--tw-text-opacity:1;color:rgb(244 63 94 / var(--tw-text-opacity, 1))}.text-sky-500{--tw-text-opacity:1;color:rgb(14 165 233 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.placeholder-slate-400::placeholder{--tw-placeholder-opacity:1;color:rgb(148 163 184 / var(--tw-placeholder-opacity, 1))}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.selection\:bg-gov-200 *::selection{--tw-bg-opacity:1;background-color:rgb(197 220 238 / var(--tw-bg-opacity, 1))}.selection\:text-gov-900 *::selection{--tw-text-opacity:1;color:rgb(23 54 86 / var(--tw-text-opacity, 1))}.selection\:bg-gov-200::selection{--tw-bg-opacity:1;background-color:rgb(197 220 238 / var(--tw-bg-opacity, 1))}.selection\:text-gov-900::selection{--tw-text-opacity:1;color:rgb(23 54 86 / var(--tw-text-opacity, 1))}.last\:mb-0:last-child{margin-bottom:0px}.hover\:-translate-y-1:hover{--tw-translate-y:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:border-gov-400:hover{--tw-border-opacity:1;border-color:rgb(103 163 209 / var(--tw-border-opacity, 1))}.hover\:border-gov-600:hover{--tw-border-opacity:1;border-color:rgb(47 105 165 / var(--tw-border-opacity, 1))}.hover\:bg-emerald-700:hover{--tw-bg-opacity:1;background-color:rgb(4 120 87 / var(--tw-bg-opacity, 1))}.hover\:bg-gov-800:hover{--tw-bg-opacity:1;background-color:rgb(30 72 117 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-white\/30:hover{background-color:rgb(255 255 255 / 0.3)}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:text-gov-900:hover{--tw-text-opacity:1;color:rgb(23 54 86 / var(--tw-text-opacity, 1))}.hover\:text-slate-600:hover{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.hover\:text-slate-700:hover{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:text-gov-700:hover{--tw-text-opacity:1;color:rgb(37 84 134 / var(--tw-text-opacity, 1))}.hover\:shadow-xl:hover{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:bg-white:focus{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-gov-600:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(47 105 165 / var(--tw-ring-opacity, 1))}.group:hover .group-hover\:bg-white\/30{background-color:rgb(255 255 255 / 0.3)}.group:hover .group-hover\:bg-blue-50\/50{background-color:rgb(239 246 255 / 0.5)}.group:hover .group-hover\:text-gov-700{--tw-text-opacity:1;color:rgb(37 84 134 / var(--tw-text-opacity, 1))}@media (min-width: 640px){.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:gap-4{gap:1rem}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}}@media (min-width: 768px){.md\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:col-span-1{grid-column:span 1 / span 1}.lg\:col-span-3{grid-column:span 3 / span 3}.lg\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}</style></head>
+<body class="bg-slate-100/70 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-gov-200 selection:text-gov-900">
+
+  <!-- Top Global Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-lg bg-gov-700 flex items-center justify-center text-white shadow-sm font-bold text-lg">
+          법
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-gov-600 tracking-tight block">행정안전부 가상 법령 데이터베이스</span>
+          <h1 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">행정정보 통합관리 기본법 검색</h1>
+        </div>
+      </div>
+      
+      <!-- Top Action Buttons (HTML Download Button Included) -->
+      <div class="flex items-center space-x-2">
+        <button id="downloadHtmlBtn" onclick="downloadCurrentHtml()" class="inline-flex items-center px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition shadow-sm">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          HTML로 다운로드
+        </button>
+        <button onclick="openFullLawModal()" class="inline-flex items-center px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition border border-slate-300">
+          <svg class="w-4 h-4 mr-1 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          전문 보기
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 w-full space-y-7">
+
+    <!-- Card News Section (Native Rendered - Never Breaks) -->
+    <section class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <div class="flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-gov-600"></span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">핵심 조항 카드뉴스</h2>
+          <span class="text-xs text-slate-500 font-normal">| 총 4장 구성 (클릭 시 확대)</span>
+        </div>
+        <span class="text-xs text-gov-700 font-semibold bg-gov-50 border border-gov-200 px-2.5 py-0.5 rounded-full">
+          2026. 7. 1. 시행
+        </span>
+      </div>
+
+      <!-- 4 Card News Items -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
+        
+        <!-- Card 1 -->
+        <div onclick="openCardPreview(1)" class="group cursor-pointer rounded-xl p-5 text-white card-news-bg aspect-square flex flex-col justify-between shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden border border-blue-900/40">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono tracking-widest text-blue-200 font-bold">#1</span>
+            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm group-hover:bg-white/30 transition">구조</span>
+          </div>
+          <div class="my-auto">
+            <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight mb-2.5">기본법 구조</h3>
+            <p class="text-xs sm:text-sm text-blue-100/90 leading-relaxed font-normal">
+              총칙 / 정책 / 의무<br>
+              표준화 / 운영 / 보칙
+            </p>
+          </div>
+          <div class="text-[11px] text-blue-300/80 flex items-center pt-2 border-t border-white/10">
+            <span>제1조 ~ 제4조 연계</span>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div onclick="openCardPreview(2)" class="group cursor-pointer rounded-xl p-5 text-white card-news-bg aspect-square flex flex-col justify-between shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden border border-blue-900/40">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono tracking-widest text-blue-200 font-bold">#2</span>
+            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm group-hover:bg-white/30 transition">정의</span>
+          </div>
+          <div class="my-auto">
+            <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight mb-2.5">핵심 정의</h3>
+            <p class="text-xs sm:text-sm text-blue-100/90 leading-relaxed font-normal">
+              행정정보 / 통합관리<br>
+              데이터 표준 / 공동활용
+            </p>
+          </div>
+          <div class="text-[11px] text-blue-300/80 flex items-center pt-2 border-t border-white/10">
+            <span>제2조 용어 정의</span>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div onclick="openCardPreview(3)" class="group cursor-pointer rounded-xl p-5 text-white card-news-bg aspect-square flex flex-col justify-between shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden border border-blue-900/40">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono tracking-widest text-blue-200 font-bold">#3</span>
+            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm group-hover:bg-white/30 transition">책무</span>
+          </div>
+          <div class="my-auto">
+            <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight mb-2.5">국가 책무</h3>
+            <p class="text-xs sm:text-sm text-blue-100/90 leading-relaxed font-normal">
+              기본계획 수립<br>
+              표준 마련 및 공표<br>
+              시스템 운영 관리
+            </p>
+          </div>
+          <div class="text-[11px] text-blue-300/80 flex items-center pt-2 border-t border-white/10">
+            <span>제4조 ~ 제7조 연계</span>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div onclick="openCardPreview(4)" class="group cursor-pointer rounded-xl p-5 text-white card-news-bg aspect-square flex flex-col justify-between shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden border border-blue-900/40">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-mono tracking-widest text-blue-200 font-bold">#4</span>
+            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm group-hover:bg-white/30 transition">보안</span>
+          </div>
+          <div class="my-auto">
+            <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight mb-2.5">정보 보안</h3>
+            <p class="text-xs sm:text-sm text-blue-100/90 leading-relaxed font-normal">
+              암호화 의무<br>
+              접근통제 강화<br>
+              사고 즉시 보고
+            </p>
+          </div>
+          <div class="text-[11px] text-blue-300/80 flex items-center pt-2 border-t border-white/10">
+            <span>제10조 · 제14조 연계</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Search & Layout Main Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      
+      <!-- Left Column: Search & Law Cards (Span 3) -->
+      <div class="lg:col-span-3 space-y-5">
+        
+        <!-- Search Input Bar -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 space-y-3">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <input type="text" id="searchInput" placeholder="조 번호, 제목 또는 본문 키워드 검색 (예: 표준, 공동활용, 과태료, 전자정부법)" class="w-full pl-11 pr-10 py-3 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-gov-600 focus:bg-white transition text-sm sm:text-base font-medium">
+            <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Search Status & Expansion Controls -->
+          <div class="flex items-center justify-between text-xs text-slate-600 pt-1">
+            <div id="searchSummary">검색결과: <span class="font-bold text-gov-700 text-sm">15</span>건</div>
+            <button id="toggleAllBodyBtn" onclick="toggleAllCards()" class="font-semibold text-gov-700 hover:text-gov-900 flex items-center">
+              <span id="toggleAllText">전체 내용 펼치기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Articles Grid Container -->
+        <div id="articlesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제1장 총칙
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제1조 목적
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-1" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">이 법은 행정정보의 통합관리와 공동활용에 관한 기본적인 사항을 정함으로써 행정의 효율성과 국민의 편익 증진에 이바지함을 목적으로 한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(1)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(1)" id="btn-toggle-1" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제1조', '목적', 1)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제1장 총칙
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제2조 정의
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-2" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">이 법에서 사용하는 용어의 뜻은 다음 각 호와 같다.</p><p class="mb-1 last:mb-0">1. "행정정보"란 「전자정부법」 제2조제6호에 따른 행정정보를 말한다.</p><p class="mb-1 last:mb-0">2. "공동활용"이란 행정기관 간 행정정보를 상호 제공하여 사용하는 것을 말한다.</p><p class="mb-1 last:mb-0">3. "통합관리"란 「공공기록물 관리에 관한 법률」 제3조에 따른 기록물의 일부로 행정정보를 통합 관리하는 것을 말한다.</p><p class="mb-1 last:mb-0">4. "데이터 표준"이란 행정정보의 공동활용을 위한 형식·코드·식별자에 관한 표준을 말한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(2)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(2)" id="btn-toggle-2" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제2조', '정의', 2)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제1장 총칙
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제3조 다른 법률과의 관계
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-3" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">행정정보의 통합관리 및 공동활용에 관하여 다른 법률에 특별한 규정이 있는 경우를 제외하고는 이 법에서 정하는 바에 따른다. 특히 「개인정보 보호법」, 「공공데이터의 제공 및 이용 활성화에 관한 법률」, 「지능정보화 기본법」에 따른 사항은 해당 법률을 우선 적용한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(3)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(3)" id="btn-toggle-3" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제3조', '다른 법률과의 관계', 3)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제1장 총칙
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제4조 국가 등의 책무
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-4" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">국가와 지방자치단체는 행정정보의 통합관리와 공동활용을 위하여 필요한 시책을 수립하여야 한다. 행정안전부장관은 그 시책을 종합적으로 조정하며, 자세한 사항은 대통령령으로 정한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(4)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(4)" id="btn-toggle-4" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제4조', '국가 등의 책무', 4)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제2장 기본계획 및 추진체계
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제5조 기본계획의 수립
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-5" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">① 행정안전부장관은 행정정보 통합관리 기본계획을 5년마다 수립하여야 한다.</p><p class="mb-1 last:mb-0">② 기본계획에는 다음 각 호의 사항을 포함하여야 한다.</p><p class="mb-1 last:mb-0">1. 행정정보 통합관리의 기본방향</p><p class="mb-1 last:mb-0">2. 행정정보 공동활용의 활성화 방안</p><p class="mb-1 last:mb-0">3. 「전자정부법」 제3조의 행정기관 정보화 시책과의 연계</p><p class="mb-1 last:mb-0">4. 그 밖에 대통령령으로 정하는 사항</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(5)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(5)" id="btn-toggle-5" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제5조', '기본계획의 수립', 5)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제2장 기본계획 및 추진체계
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제6조 시행계획의 수립
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-6" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">행정기관의 장은 매년 시행계획을 수립하여야 하며, 그 결과를 행정안전부장관에게 보고하여야 한다. 시행계획의 형식과 절차는 대통령령으로 정한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(6)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(6)" id="btn-toggle-6" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제6조', '시행계획의 수립', 6)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제2장 기본계획 및 추진체계
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제7조 공동활용 협의회
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-7" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">행정정보 공동활용에 관한 사항을 협의하기 위하여 행정안전부에 행정정보 공동활용 협의회를 둔다. 협의회의 구성과 운영에 필요한 사항은 대통령령으로 정한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(7)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(7)" id="btn-toggle-7" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제7조', '공동활용 협의회', 7)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제3장 공동활용
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제8조 공동활용 신청
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-8" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal ">
+                <p class="mb-1 last:mb-0">행정기관의 장은 다른 행정기관이 보유한 행정정보를 활용하려는 경우에는 행정안전부장관에게 신청하여야 한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(8)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                <button onclick="copyLawText('제8조', '공동활용 신청', 8)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제3장 공동활용
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제9조 공동활용 승인
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-9" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal ">
+                <p class="mb-1 last:mb-0">행정안전부장관은 신청을 받은 경우 「개인정보 보호법」 제17조에 따른 절차를 거쳐 30일 이내에 승인 여부를 결정하여야 한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(9)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                <button onclick="copyLawText('제9조', '공동활용 승인', 9)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제3장 공동활용
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제10조 보안 조치
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-10" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">공동활용 시 행정정보의 안전성 확보를 위하여 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 및 「개인정보 보호법」에서 정하는 보안 조치를 적용하여야 한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(10)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(10)" id="btn-toggle-10" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제10조', '보안 조치', 10)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제4장 데이터 표준화
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제11조 데이터 표준
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-11" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal ">
+                <p class="mb-1 last:mb-0">행정안전부장관은 데이터 표준을 정하여 고시할 수 있다. 데이터 표준의 적용 범위와 시기는 대통령령으로 정한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(11)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                <button onclick="copyLawText('제11조', '데이터 표준', 11)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제4장 데이터 표준화
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제12조 표준 적용 의무
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-12" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal ">
+                <p class="mb-1 last:mb-0">행정기관은 행정정보를 생산·관리·활용할 때 제11조에 따른 데이터 표준을 따라야 한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(12)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                <button onclick="copyLawText('제12조', '표준 적용 의무', 12)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제5장 감독·벌칙
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제13조 실태조사
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-13" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal ">
+                <p class="mb-1 last:mb-0">행정안전부장관은 매년 행정정보 통합관리 실태를 조사하여 그 결과를 공개한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(13)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                <button onclick="copyLawText('제13조', '실태조사', 13)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  제5장 감독·벌칙
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                제14조 과태료
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-14" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-3">
+                <p class="mb-1 last:mb-0">다음 각 호의 어느 하나에 해당하는 자에게는 1천만원 이하의 과태료를 부과한다.</p><p class="mb-1 last:mb-0">1. 제8조를 위반하여 승인 없이 공동활용한 자</p><p class="mb-1 last:mb-0">2. 제12조에 따른 데이터 표준을 정당한 사유 없이 위반한 자</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(14)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                  <button onclick="toggleSingleCard(14)" id="btn-toggle-14" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    펼치기
+                  </button>
+                
+                <button onclick="copyLawText('제14조', '과태료', 14)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  <svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  부 칙
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                부칙 제1조 시행일
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-15" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal ">
+                <p class="mb-1 last:mb-0">이 법은 2026년 7월 1일부터 시행한다.</p>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(15)" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                
+                <button onclick="copyLawText('부칙 제1조', '시행일', 15)" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty Result State -->
+        <div id="emptyState" class="hidden bg-white rounded-2xl border border-slate-200 p-12 text-center">
+          <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h4 class="font-bold text-slate-800 text-sm">일치하는 조항이 없습니다.</h4>
+          <p class="text-xs text-slate-500 mt-1">검색어를 수정하거나 우측 분류 필터를 '전체'로 변경해 보세요.</p>
+          <button onclick="resetAllFilters()" class="mt-4 px-3.5 py-1.5 bg-gov-700 text-white rounded-lg text-xs font-semibold hover:bg-gov-800 transition">
+            필터 초기화
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Category Filter Sidebar (Span 1) -->
+      <aside class="lg:col-span-1 space-y-4">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 sticky top-24">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center">
+              <svg class="w-4 h-4 mr-1.5 text-gov-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+              </svg>
+              조항 분류
+            </h3>
+            <span class="text-[11px] text-slate-400">총 15개 조항</span>
+          </div>
+
+          <!-- Filter Navigation Buttons -->
+          <div class="space-y-1.5" id="categoryNav">
+            <button onclick="setCategoryFilter('all')" class="cat-btn active w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition" data-cat="all">
+              <span class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-slate-400 mr-2 dot"></span> 전체 조항
+              </span>
+              <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 count">15</span>
+            </button>
+
+            <button onclick="setCategoryFilter('총칙')" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" data-cat="총칙">
+              <span class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-blue-500 mr-2 dot"></span> 총칙
+              </span>
+              <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 count">4</span>
+            </button>
+
+            <button onclick="setCategoryFilter('기본계획')" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" data-cat="기본계획">
+              <span class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 dot"></span> 기본계획·추진
+              </span>
+              <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 count">3</span>
+            </button>
+
+            <button onclick="setCategoryFilter('공동활용')" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" data-cat="공동활용">
+              <span class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 mr-2 dot"></span> 공동활용·보안
+              </span>
+              <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 count">3</span>
+            </button>
+
+            <button onclick="setCategoryFilter('데이터표준')" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" data-cat="데이터표준">
+              <span class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-amber-500 mr-2 dot"></span> 데이터 표준화
+              </span>
+              <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 count">2</span>
+            </button>
+
+            <button onclick="setCategoryFilter('감독벌칙')" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" data-cat="감독벌칙">
+              <span class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-rose-500 mr-2 dot"></span> 감독·과태료
+              </span>
+              <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 count">2</span>
+            </button>
+
+            <button onclick="setCategoryFilter('부칙')" class="cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" data-cat="부칙">
+              <span class="flex items-center">
+                <span class="w-2 h-2 rounded-full bg-purple-500 mr-2 dot"></span> 부칙
+              </span>
+              <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 count">1</span>
+            </button>
+          </div>
+
+          <!-- Quick Tip Box -->
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 leading-relaxed">
+            <span class="font-bold text-slate-700 block mb-1">안내</span>
+            카드의 <strong>전문 보기</strong> 버튼을 누르면 해당 조항의 전체 원문과 연계 법률을 확인할 수 있습니다.
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Card News Fullscreen Preview Modal -->
+  <div id="cardPreviewModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="relative max-w-md w-full rounded-2xl overflow-hidden shadow-2xl border border-blue-900 flex flex-col card-news-bg text-white p-7">
+      <button onclick="closeCardPreview()" class="absolute top-4 right-4 text-white/70 hover:text-white p-1 rounded-lg bg-black/20">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+
+      <span id="previewTag" class="text-xs font-mono tracking-widest text-blue-200 font-bold mb-6">#1</span>
+      
+      <div class="my-auto py-6">
+        <h3 id="previewTitle" class="text-3xl font-extrabold tracking-tight mb-4">기본법 구조</h3>
+        <p id="previewContent" class="text-lg text-blue-100 leading-relaxed font-medium">
+          총칙 / 정책 / 의무<br>
+          표준화 / 운영 / 보칙
+        </p>
+      </div>
+
+      <div class="pt-4 border-t border-white/20 text-xs text-blue-200 flex justify-between items-center">
+        <span id="previewFooter">제1조 ~ 제4조 연계</span>
+        <button onclick="closeCardPreview()" class="px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-white font-semibold transition">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Article Detail / Full Law Modal -->
+  <div id="fullLawModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="relative max-w-3xl w-full bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-[85vh] flex flex-col">
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 rounded-t-2xl">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-gov-700 text-white flex items-center justify-center font-bold text-sm">
+            법
+          </div>
+          <div>
+            <h3 id="modalTitleText" class="text-base font-bold text-slate-900">(가상) 행정정보 통합관리 기본법 전문</h3>
+            <p class="text-xs text-slate-500">[시행 2026. 7. 1.] [법률 제99999호, 2026. 6. 1., 가상 제정]</p>
+          </div>
+        </div>
+        <button onclick="closeFullLawModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div id="modalLawBody" class="p-6 overflow-y-auto space-y-4 text-sm text-slate-700 custom-scrollbar leading-relaxed">
+        <!-- Content inserted dynamically -->
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end rounded-b-2xl">
+        <button onclick="closeFullLawModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold rounded-lg transition">
+          창 닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-none">
+    알림 내용
+  </div>
+
+  <script>
+    // 15 Articles Data (From 조항데이터.json & 가상_행정정보통합관리법_본문.md)
+    const lawData = [
+      {
+        "id": 1,
+        "조": "제1조",
+        "제목": "목적",
+        "본문": "이 법은 행정정보의 통합관리와 공동활용에 관한 기본적인 사항을 정함으로써 행정의 효율성과 국민의 편익 증진에 이바지함을 목적으로 한다.",
+        "category": "총칙",
+        "chapter": "제1장 총칙",
+        "iconType": "target"
+      },
+      {
+        "id": 2,
+        "조": "제2조",
+        "제목": "정의",
+        "본문": "이 법에서 사용하는 용어의 뜻은 다음 각 호와 같다.\n1. \"행정정보\"란 「전자정부법」 제2조제6호에 따른 행정정보를 말한다.\n2. \"공동활용\"이란 행정기관 간 행정정보를 상호 제공하여 사용하는 것을 말한다.\n3. \"통합관리\"란 「공공기록물 관리에 관한 법률」 제3조에 따른 기록물의 일부로 행정정보를 통합 관리하는 것을 말한다.\n4. \"데이터 표준\"이란 행정정보의 공동활용을 위한 형식·코드·식별자에 관한 표준을 말한다.",
+        "category": "총칙",
+        "chapter": "제1장 총칙",
+        "iconType": "book"
+      },
+      {
+        "id": 3,
+        "조": "제3조",
+        "제목": "다른 법률과의 관계",
+        "본문": "행정정보의 통합관리 및 공동활용에 관하여 다른 법률에 특별한 규정이 있는 경우를 제외하고는 이 법에서 정하는 바에 따른다. 특히 「개인정보 보호법」, 「공공데이터의 제공 및 이용 활성화에 관한 법률」, 「지능정보화 기본법」에 따른 사항은 해당 법률을 우선 적용한다.",
+        "category": "총칙",
+        "chapter": "제1장 총칙",
+        "iconType": "link"
+      },
+      {
+        "id": 4,
+        "조": "제4조",
+        "제목": "국가 등의 책무",
+        "본문": "국가와 지방자치단체는 행정정보의 통합관리와 공동활용을 위하여 필요한 시책을 수립하여야 한다. 행정안전부장관은 그 시책을 종합적으로 조정하며, 자세한 사항은 대통령령으로 정한다.",
+        "category": "총칙",
+        "chapter": "제1장 총칙",
+        "iconType": "building"
+      },
+      {
+        "id": 5,
+        "조": "제5조",
+        "제목": "기본계획의 수립",
+        "본문": "① 행정안전부장관은 행정정보 통합관리 기본계획을 5년마다 수립하여야 한다.\n② 기본계획에는 다음 각 호의 사항을 포함하여야 한다.\n1. 행정정보 통합관리의 기본방향\n2. 행정정보 공동활용의 활성화 방안\n3. 「전자정부법」 제3조의 행정기관 정보화 시책과의 연계\n4. 그 밖에 대통령령으로 정하는 사항",
+        "category": "기본계획",
+        "chapter": "제2장 기본계획 및 추진체계",
+        "iconType": "strategy"
+      },
+      {
+        "id": 6,
+        "조": "제6조",
+        "제목": "시행계획의 수립",
+        "본문": "행정기관의 장은 매년 시행계획을 수립하여야 하며, 그 결과를 행정안전부장관에게 보고하여야 한다. 시행계획의 형식과 절차는 대통령령으로 정한다.",
+        "category": "기본계획",
+        "chapter": "제2장 기본계획 및 추진체계",
+        "iconType": "trend"
+      },
+      {
+        "id": 7,
+        "조": "제7조",
+        "제목": "공동활용 협의회",
+        "본문": "행정정보 공동활용에 관한 사항을 협의하기 위하여 행정안전부에 행정정보 공동활용 협의회를 둔다. 협의회의 구성과 운영에 필요한 사항은 대통령령으로 정한다.",
+        "category": "기본계획",
+        "chapter": "제2장 기본계획 및 추진체계",
+        "iconType": "users"
+      },
+      {
+        "id": 8,
+        "조": "제8조",
+        "제목": "공동활용 신청",
+        "본문": "행정기관의 장은 다른 행정기관이 보유한 행정정보를 활용하려는 경우에는 행정안전부장관에게 신청하여야 한다.",
+        "category": "공동활용",
+        "chapter": "제3장 공동활용",
+        "iconType": "send"
+      },
+      {
+        "id": 9,
+        "조": "제9조",
+        "제목": "공동활용 승인",
+        "본문": "행정안전부장관은 신청을 받은 경우 「개인정보 보호법」 제17조에 따른 절차를 거쳐 30일 이내에 승인 여부를 결정하여야 한다.",
+        "category": "공동활용",
+        "chapter": "제3장 공동활용",
+        "iconType": "check-shield"
+      },
+      {
+        "id": 10,
+        "조": "제10조",
+        "제목": "보안 조치",
+        "본문": "공동활용 시 행정정보의 안전성 확보를 위하여 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 및 「개인정보 보호법」에서 정하는 보안 조치를 적용하여야 한다.",
+        "category": "공동활용",
+        "chapter": "제3장 공동활용",
+        "iconType": "lock"
+      },
+      {
+        "id": 11,
+        "조": "제11조",
+        "제목": "데이터 표준",
+        "본문": "행정안전부장관은 데이터 표준을 정하여 고시할 수 있다. 데이터 표준의 적용 범위와 시기는 대통령령으로 정한다.",
+        "category": "데이터표준",
+        "chapter": "제4장 데이터 표준화",
+        "iconType": "database"
+      },
+      {
+        "id": 12,
+        "조": "제12조",
+        "제목": "표준 적용 의무",
+        "본문": "행정기관은 행정정보를 생산·관리·활용할 때 제11조에 따른 데이터 표준을 따라야 한다.",
+        "category": "데이터표준",
+        "chapter": "제4장 데이터 표준화",
+        "iconType": "gear"
+      },
+      {
+        "id": 13,
+        "조": "제13조",
+        "제목": "실태조사",
+        "본문": "행정안전부장관은 매년 행정정보 통합관리 실태를 조사하여 그 결과를 공개한다.",
+        "category": "감독벌칙",
+        "chapter": "제5장 감독·벌칙",
+        "iconType": "chart"
+      },
+      {
+        "id": 14,
+        "조": "제14조",
+        "제목": "과태료",
+        "본문": "다음 각 호의 어느 하나에 해당하는 자에게는 1천만원 이하의 과태료를 부과한다.\n1. 제8조를 위반하여 승인 없이 공동활용한 자\n2. 제12조에 따른 데이터 표준을 정당한 사유 없이 위반한 자",
+        "category": "감독벌칙",
+        "chapter": "제5장 감독·벌칙",
+        "iconType": "warning"
+      },
+      {
+        "id": 15,
+        "조": "부칙 제1조",
+        "제목": "시행일",
+        "본문": "이 법은 2026년 7월 1일부터 시행한다.",
+        "category": "부칙",
+        "chapter": "부 칙",
+        "iconType": "clock"
+      }
+    ];
+
+    // Card News Metadata for Click View
+    const cardNewsItems = {
+      1: {
+        tag: "#1 기본법 구조",
+        title: "기본법 구조",
+        content: "총칙 / 정책 / 의무\n표준화 / 운영 / 보칙",
+        footer: "제1조부터 제4조까지의 기본체계와 국가 책무 명시"
+      },
+      2: {
+        tag: "#2 핵심 정의",
+        title: "핵심 정의",
+        content: "행정정보 / 통합관리\n데이터 표준 / 공동활용",
+        footer: "제2조 각 호에 따른 법정 용어 명확화"
+      },
+      3: {
+        tag: "#3 국가 책무",
+        title: "국가 책무",
+        content: "기본계획 수립\n표준 마련 및 공표\n시스템 운영 관리",
+        footer: "5년 단위 기본계획 및 연간 시행계획 수립 의무"
+      },
+      4: {
+        tag: "#4 정보 보안",
+        title: "정보 보안",
+        content: "암호화 의무\n접근통제 강화\n사고 즉시 보고",
+        footer: "개인정보보호법 및 정보통신망법 준용, 위반 시 과태료"
+      }
+    };
+
+    // Vector Icon Generator (Never breaks, 100% self-contained)
+    function getCategorySvgIcon(type) {
+      switch(type) {
+        case 'gear':
+          return `<svg class="w-7 h-7 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`;
+        case 'check-shield':
+        case 'lock':
+          return `<svg class="w-7 h-7 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>`;
+        case 'database':
+          return `<svg class="w-7 h-7 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>`;
+        case 'warning':
+          return `<svg class="w-7 h-7 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+        case 'building':
+        case 'strategy':
+          return `<svg class="w-7 h-7 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg>`;
+        default:
+          return `<svg class="w-7 h-7 text-gov-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
+      }
+    }
+
+    // State
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let isAllExpanded = false;
+
+    // Element references
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const articlesContainer = document.getElementById('articlesContainer');
+    const resultCount = document.getElementById('resultCount');
+    const emptyState = document.getElementById('emptyState');
+    const searchSummary = document.getElementById('searchSummary');
+
+    // Regexp Escape
+    function escapeRegExp(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    // Highlight text
+    function highlight(text, query) {
+      if (!query.trim()) return text;
+      const re = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+      return text.replace(re, '<mark class="highlight">$1</mark>');
+    }
+
+    // Render Cards
+    function render() {
+      const q = searchQuery.trim().toLowerCase();
+
+      const filtered = lawData.filter(item => {
+        const catMatch = (activeCategory === 'all') || (item.category === activeCategory);
+        const text = `${item.조} ${item.제목} ${item.본문}`.toLowerCase();
+        const searchMatch = !q || text.includes(q);
+        return catMatch && searchMatch;
+      });
+
+      resultCount.textContent = filtered.length;
+
+      if (q) {
+        searchSummary.innerHTML = `검색어: '<strong class="text-gov-800">${q}</strong>', 결과 <span class="font-bold text-gov-700 text-sm">${filtered.length}</span>건`;
+      } else {
+        searchSummary.innerHTML = `검색결과: <span class="font-bold text-gov-700 text-sm">${filtered.length}</span>건`;
+      }
+
+      if (filtered.length === 0) {
+        articlesContainer.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      articlesContainer.innerHTML = filtered.map(item => {
+        const highlightedTitle = highlight(item.제목, q);
+        const highlightedNum = highlight(item.조, q);
+        
+        const lines = item.본문.split('\n');
+        const formattedBody = lines.map(line => `<p class="mb-1 last:mb-0">${highlight(line, q)}</p>`).join('');
+
+        const isCollapsed = !isAllExpanded && item.본문.length > 70;
+
+        return `
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between hover:border-gov-400 group">
+            <div>
+              <!-- Top Field Icon Badge -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shadow-inner group-hover:bg-blue-50/50 transition">
+                  ${getCategorySvgIcon(item.iconType)}
+                </div>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                  ${item.chapter}
+                </span>
+              </div>
+
+              <!-- Title & Article Number -->
+              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-gov-700 transition leading-snug mb-2">
+                ${highlightedNum} ${highlightedTitle}
+              </h3>
+
+              <!-- Article Content Summary -->
+              <div id="body-${item.id}" class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal ${isCollapsed ? 'line-clamp-3' : ''}">
+                ${formattedBody}
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openSingleLawModal(${item.id})" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:border-gov-600 hover:text-gov-700 text-slate-700 text-xs font-semibold transition bg-white shadow-2xs flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                전문 보기
+              </button>
+
+              <div class="flex items-center space-x-1.5">
+                ${item.본문.length > 70 ? `
+                  <button onclick="toggleSingleCard(${item.id})" id="btn-toggle-${item.id}" class="text-[11px] font-medium text-slate-400 hover:text-gov-700 px-1.5 py-1">
+                    ${isAllExpanded ? '요약' : '펼치기'}
+                  </button>
+                ` : ''}
+                <button onclick="copyLawText('${item.조}', '${item.제목}', ${item.id})" title="조항 복사" class="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Toggle single card body
+    window.toggleSingleCard = function(id) {
+      const el = document.getElementById(`body-${id}`);
+      const btn = document.getElementById(`btn-toggle-${id}`);
+      if (!el) return;
+      if (el.classList.contains('line-clamp-3')) {
+        el.classList.remove('line-clamp-3');
+        if (btn) btn.textContent = '요약';
+      } else {
+        el.classList.add('line-clamp-3');
+        if (btn) btn.textContent = '펼치기';
+      }
+    };
+
+    // Toggle All Cards
+    window.toggleAllCards = function() {
+      isAllExpanded = !isAllExpanded;
+      document.getElementById('toggleAllText').textContent = isAllExpanded ? '전체 요약 보기' : '전체 내용 펼치기';
+      render();
+    };
+
+    // Set Category Filter
+    window.setCategoryFilter = function(cat) {
+      activeCategory = cat;
+      const buttons = document.querySelectorAll('.cat-btn');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('data-cat') === cat) {
+          btn.className = "cat-btn active w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-gov-800 text-white shadow-sm transition";
+          btn.querySelector('.count').className = "text-[11px] px-1.5 py-0.5 rounded bg-gov-900 text-blue-100 count";
+        } else {
+          btn.className = "cat-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition";
+          btn.querySelector('.count').className = "text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 count";
+        }
+      });
+      render();
+    };
+
+    // Reset All Filters
+    window.resetAllFilters = function() {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.add('hidden');
+      setCategoryFilter('all');
+    };
+
+    // Search events
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      if (searchQuery.length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+      render();
+    });
+
+    window.clearSearch = function() {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.add('hidden');
+      searchInput.focus();
+      render();
+    };
+
+    // Card News Preview Modal
+    window.openCardPreview = function(num) {
+      const data = cardNewsItems[num];
+      if (!data) return;
+      document.getElementById('previewTag').textContent = data.tag;
+      document.getElementById('previewTitle').textContent = data.title;
+      document.getElementById('previewContent').innerHTML = data.content.replace(/\n/g, '<br>');
+      document.getElementById('previewFooter').textContent = data.footer;
+      
+      const modal = document.getElementById('cardPreviewModal');
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeCardPreview = function() {
+      document.getElementById('cardPreviewModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    };
+
+    document.getElementById('cardPreviewModal').addEventListener('click', (e) => {
+      if (e.target.id === 'cardPreviewModal') closeCardPreview();
+    });
+
+    // Full Law Text Modal
+    window.openFullLawModal = function() {
+      document.getElementById('modalTitleText').textContent = "(가상) 행정정보 통합관리 기본법 전문";
+      
+      let html = `
+        <div class="bg-blue-50 border-l-4 border-gov-600 p-3 rounded-r text-xs text-gov-900 font-medium">
+          가상 법령 데이터베이스 (seed=203) - 2026. 7. 1. 시행 예정
+        </div>
+      `;
+
+      let curChapter = "";
+      lawData.forEach(item => {
+        if (item.chapter !== curChapter) {
+          curChapter = item.chapter;
+          html += `
+            <div class="pt-4 border-t border-slate-200 mt-4">
+              <span class="inline-block bg-slate-100 text-gov-800 text-xs font-bold px-2.5 py-1 rounded">
+                ${curChapter}
+              </span>
+            </div>
+          `;
+        }
+        html += `
+          <div class="py-2">
+            <h5 class="font-bold text-slate-900 text-sm mb-1">${item.조} (${item.제목})</h5>
+            <p class="text-xs sm:text-sm text-slate-600 whitespace-pre-line pl-2 border-l-2 border-slate-200">${item.본문}</p>
+          </div>
+        `;
+      });
+
+      document.getElementById('modalLawBody').innerHTML = html;
+      document.getElementById('fullLawModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    };
+
+    // Single Article Law Modal
+    window.openSingleLawModal = function(id) {
+      const item = lawData.find(d => d.id === id);
+      if (!item) return;
+
+      document.getElementById('modalTitleText').textContent = `${item.조}(${item.제목}) 상세 전문`;
+      document.getElementById('modalLawBody').innerHTML = `
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-xs font-bold text-gov-700 bg-gov-50 border border-gov-200 px-2 py-0.5 rounded">
+            ${item.chapter}
+          </span>
+          <h4 class="text-lg font-extrabold text-slate-900 mt-2 mb-3">
+            ${item.조} (${item.제목})
+          </h4>
+          <div class="text-sm text-slate-700 whitespace-pre-line leading-relaxed bg-white p-4 rounded-lg border border-slate-200">
+            ${item.본문}
+          </div>
+        </div>
+        <div class="text-xs text-slate-500 pt-2">
+          * 본 규정은 「행정정보 통합관리 기본법」에 의거하여 관리됩니다.
+        </div>
+      `;
+      document.getElementById('fullLawModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeFullLawModal = function() {
+      document.getElementById('fullLawModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    };
+
+    document.getElementById('fullLawModal').addEventListener('click', (e) => {
+      if (e.target.id === 'fullLawModal') closeFullLawModal();
+    });
+
+    // Copy to clipboard
+    window.copyLawText = function(num, title, id) {
+      const item = lawData.find(d => d.id === id);
+      if (!item) return;
+      const text = `[행정정보 통합관리 기본법]\n${num}(${title})\n${item.본문}`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`'${num}(${title})' 클립보드에 복사되었습니다.`);
+      }).catch(() => {
+        showToast('복사에 실패했습니다.');
+      });
+    };
+
+    // Toast function
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0', 'translate-y-10');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-10');
+      }, 2200);
+    }
+
+    // Direct HTML File Download Function
+    window.downloadCurrentHtml = function() {
+      const doctype = "<!DOCTYPE html>\n";
+      const fullHtml = doctype + document.documentElement.outerHTML;
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const downloadUrl = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = "행정정보_통합관리_기본법_검색서비스.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+      
+      showToast("HTML 파일이 성공적으로 다운로드되었습니다.");
+    };
+
+    // ESC Key to close modals
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCardPreview();
+        closeFullLawModal();
+      }
+    });
+
+    // Start
+    render();
+  </script>
+
+</body></html>
